@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Button, Alert, ActivityIndicator, Vibration } from "react-native";
-import {Camera, CameraView, useCameraPermissions} from "expo-camera";
+import { Camera, CameraView, useCameraPermissions } from "expo-camera";
+import { useUser } from "@clerk/clerk-expo"; // Import useUser hook.
 
 export default function CameraScreen() {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanningEnabled, setScanningEnabled] = useState(true);
     const [scannedData, setScannedData] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const { user } = useUser(); // Use useUser to access user info directly.
 
     if (!permission) {
         return (
@@ -26,6 +30,44 @@ export default function CameraScreen() {
         );
     }
 
+    const sendScanDataToBackend = async (sessionId) => {
+        try {
+            if (!user) {
+                Alert.alert("Error", "User not logged in.");
+                return;
+            }
+
+            setLoading(true);
+
+            const payload = {
+                sessionId,
+                username: user.fullName || user.username || user.email, // Use user's full name, username, or email.
+            };
+
+            const response = await fetch("http://192.168.0.3:8080/kiosk/api/scan", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                const data = await response.text();
+                Alert.alert("Success", `Server response: ${data}`);
+            } else {
+                const errorText = await response.text();
+                Alert.alert("Error", `Failed to send data: ${errorText}`);
+            }
+        } catch (error) {
+            console.error("Error sending scan data:", error);
+            Alert.alert("Error", "An error occurred while sending data to the server.");
+        } finally {
+            setLoading(false);
+            setScanningEnabled(true); // Re-enable scanning for subsequent QR codes.
+        }
+    };
+
     const onBarcodeScanned = ({ data }) => {
         if (!scanningEnabled) return;
 
@@ -34,10 +76,9 @@ export default function CameraScreen() {
             setScanningEnabled(false);
             setScannedData(data);
 
-            // Perform any action with the scanned data
-            Alert.alert("QR Code Scanned", `Data: ${data}`, [
-                { text: "OK", onPress: () => setScanningEnabled(true) },
-            ]);
+            // Extract session ID from scanned data.
+            const sessionId = data; // Assuming the QR code directly contains the session ID.
+            sendScanDataToBackend(sessionId);
         } catch (error) {
             Alert.alert("Error", "Failed to scan QR code. Please try again.");
             setScanningEnabled(true);
@@ -54,6 +95,12 @@ export default function CameraScreen() {
                     barcodeTypes: ["qr"],
                 }}
             />
+            {loading && (
+                <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="large" color="#ffffff" />
+                    <Text style={styles.loadingText}>Processing...</Text>
+                </View>
+            )}
             {scannedData && (
                 <View style={styles.dataContainer}>
                     <Text style={styles.dataText}>Scanned Data:</Text>
@@ -90,5 +137,20 @@ const styles = StyleSheet.create({
     dataText: {
         color: "#fff",
         fontSize: 16,
+    },
+    loadingOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    loadingText: {
+        color: "#ffffff",
+        fontSize: 18,
+        marginTop: 10,
     },
 });
