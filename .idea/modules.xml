@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/KioskMobileAppService-UI.iml" filepath="$PROJECT_DIR$/.idea/KioskMobileAppService-UI.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/KioskMobileAppService-UI-Nidhi_DEV_MAIN_MERGE.iml" filepath="$PROJECT_DIR$/.idea/KioskMobileAppService-UI-Nidhi_DEV_MAIN_MERGE.iml" />
     </modules>
   </component>
