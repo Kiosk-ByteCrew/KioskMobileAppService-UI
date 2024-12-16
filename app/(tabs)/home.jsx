@@ -5,7 +5,7 @@ import {
     StyleSheet,
     ImageBackground,
     Pressable,
-    Alert,
+    Alert, TouchableOpacity,
 } from "react-native";
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import { useRouter, Link } from "expo-router";
@@ -58,6 +58,10 @@ export default function Home() {
                 <Pressable onPress={handleScanQR} style={styles.scanButton}>
                     <Text style={styles.scanButtonText}>Scan QR</Text>
                 </Pressable>
+                <Pressable onPress={() => router.push("/pastorder")} style={styles.scanButton}>
+                    <Text style={styles.scanButtonText}>View Past Orders</Text>
+                </Pressable>
+
                 <Pressable onPress={handleLogout} style={styles.logoutButton}>
                     <Text style={styles.logoutButtonText}>Logout</Text>
                 </Pressable>
