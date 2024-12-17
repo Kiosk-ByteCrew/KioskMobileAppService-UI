@@ -36,12 +36,14 @@ export default function CameraScreen() {
                 Alert.alert("Error", "User not logged in.");
                 return;
             }
+            const emailAddress = user.emailAddresses[0].emailAddress;
 
             setLoading(true);
 
             const payload = {
                 sessionId,
-                username: user.fullName || user.username || user.email, // Use user's full name, username, or email.
+                username: user.fullName || user.username,
+                emailAddress,
             };
 
             const response = await fetch("http://192.168.0.3:8080/kiosk/api/scan", {
@@ -70,7 +72,6 @@ export default function CameraScreen() {
 
     const onBarcodeScanned = ({ data }) => {
         if (!scanningEnabled) return;
-
         try {
             Vibration.vibrate();
             setScanningEnabled(false);
