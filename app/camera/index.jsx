@@ -46,7 +46,7 @@ export default function CameraScreen() {
                 emailAddress,
             };
 
-            const response = await fetch("http://192.168.0.3:8080/kiosk/api/scan", {
+            const response = await fetch(`http://${process.env.IP_USED}:${process.env.KIOSK_SERVICE_PORT}/kiosk/api/scan`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
